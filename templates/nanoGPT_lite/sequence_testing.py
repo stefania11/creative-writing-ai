@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from transformer_model import CreativeWritingTransformer
+from templates.nanoGPT_lite.transformer_model import CreativeWritingTransformer
 import json
 import numpy as np
 from sklearn.metrics import accuracy_score
