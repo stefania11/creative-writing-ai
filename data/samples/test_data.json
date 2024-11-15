@@ -1,12 +1,22 @@
 {
   "samples": [
     {
-      "prompt": "Write a story about a magical library",
-      "target": "In the heart of an ancient city stood a library unlike any other. Its towering shelves reached toward the ceiling, filled with books that whispered their secrets to curious readers. Young students would spend hours exploring the dusty corners, discovering tales of adventure and wonder. The librarian, a wise woman with silver hair, knew every book by heart and guided visitors to exactly what they needed."
+      "prompt": "Write a story about a student who discovers a hidden talent.",
+      "target": "Sarah never thought she was special until the day she discovered she could paint with music. When she played the piano, colors swirled in her mind, creating beautiful landscapes on canvas. Her art teacher was amazed by her unique ability to translate melodies into visual masterpieces.",
+      "input_ids": [1000, 1200, 1500, 1800, 2000],
+      "target_ids": [2100, 2300, 2500, 2800, 3000]
     },
     {
-      "prompt": "Describe your perfect day",
-      "target": "My perfect day begins with the sun peeking through my window. After a healthy breakfast, I meet my friends at the park where we play basketball and share stories. Later, we work on our science project, experimenting with different chemical reactions. The day ends with my family gathering for dinner, sharing laughs and planning our next adventure."
+      "prompt": "Describe your perfect day at school.",
+      "target": "My perfect school day started with an exciting science experiment where we learned about chemical reactions. During lunch, I shared stories with my friends, and in English class, we wrote creative poems about nature. The day ended with a fun basketball game in PE.",
+      "input_ids": [1100, 1300, 1600, 1900, 2100],
+      "target_ids": [2200, 2400, 2600, 2900, 3100]
+    },
+    {
+      "prompt": "What would happen if animals could talk?",
+      "target": "If animals could talk, our world would be filled with amazing conversations. Dogs would share their adventures, cats would explain why they love sleeping in sunbeams, and birds would tell stories about their travels across continents. Every walk in the park would become an opportunity to learn from nature.",
+      "input_ids": [1200, 1400, 1700, 2000, 2200],
+      "target_ids": [2300, 2500, 2700, 3000, 3200]
     }
   ]
 }
