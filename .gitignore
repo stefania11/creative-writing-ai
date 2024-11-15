@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+venv/
+venv_testing/
+*.log
+training_log*.txt
+.DS_Store

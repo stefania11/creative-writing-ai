@@ -1,0 +1,640 @@
+[
+  {
+    "input_ids": [
+      16594,
+      257,
+      1621,
+      546,
+      257,
+      3710,
+      508,
+      27472,
+      257,
+      7104,
+      7401,
+      1141,
+      257,
+      1524,
+      7401,
+      905,
+      13
+    ],
+    "target_ids": [
+      16594,
+      257,
+      1621,
+      546,
+      257,
+      3710,
+      508,
+      27472,
+      257,
+      7104,
+      7401,
+      1141,
+      257,
+      1524,
+      7401,
+      905,
+      13
+    ],
+    "criteria": {
+      "story_elements": [
+        "plot",
+        "character",
+        "setting",
+        "conflict",
+        "resolution"
+      ],
+      "writing_mechanics": [
+        "grammar",
+        "punctuation",
+        "spelling"
+      ],
+      "creativity": [
+        "originality",
+        "imagination",
+        "engagement"
+      ],
+      "grade_level": "middle_school",
+      "prompt_type": "creative_writing"
+    }
+  },
+  {
+    "input_ids": [
+      16447,
+      257,
+      10715,
+      1621,
+      546,
+      257,
+      4814,
+      5888,
+      1492,
+      326,
+      5983,
+      284,
+      281,
+      10059,
+      8855,
+      13
+    ],
+    "target_ids": [
+      16447,
+      257,
+      10715,
+      1621,
+      546,
+      257,
+      4814,
+      5888,
+      1492,
+      326,
+      5983,
+      284,
+      281,
+      10059,
+      8855,
+      13
+    ],
+    "criteria": {
+      "story_elements": [
+        "plot",
+        "character",
+        "setting",
+        "conflict",
+        "resolution"
+      ],
+      "writing_mechanics": [
+        "grammar",
+        "punctuation",
+        "spelling"
+      ],
+      "creativity": [
+        "originality",
+        "imagination",
+        "engagement"
+      ],
+      "grade_level": "middle_school",
+      "prompt_type": "creative_writing"
+    }
+  },
+  {
+    "input_ids": [
+      16594,
+      546,
+      257,
+      1110,
+      618,
+      477,
+      7914,
+      4410,
+      5025,
+      1762,
+      379,
+      1524,
+      13
+    ],
+    "target_ids": [
+      16594,
+      546,
+      257,
+      1110,
+      618,
+      477,
+      7914,
+      4410,
+      5025,
+      1762,
+      379,
+      1524,
+      13
+    ],
+    "criteria": {
+      "story_elements": [
+        "plot",
+        "character",
+        "setting",
+        "conflict",
+        "resolution"
+      ],
+      "writing_mechanics": [
+        "grammar",
+        "punctuation",
+        "spelling"
+      ],
+      "creativity": [
+        "originality",
+        "imagination",
+        "engagement"
+      ],
+      "grade_level": "middle_school",
+      "prompt_type": "creative_writing"
+    }
+  },
+  {
+    "input_ids": [
+      24564,
+      4892,
+      534,
+      2818,
+      5509,
+      4803,
+      11,
+      1390,
+      477,
+      262,
+      2041,
+      3033,
+      340,
+      561,
+      423,
+      13
+    ],
+    "target_ids": [
+      24564,
+      4892,
+      534,
+      2818,
+      5509,
+      4803,
+      11,
+      1390,
+      477,
+      262,
+      2041,
+      3033,
+      340,
+      561,
+      423,
+      13
+    ],
+    "criteria": {
+      "story_elements": [
+        "plot",
+        "character",
+        "setting",
+        "conflict",
+        "resolution"
+      ],
+      "writing_mechanics": [
+        "grammar",
+        "punctuation",
+        "spelling"
+      ],
+      "creativity": [
+        "originality",
+        "imagination",
+        "engagement"
+      ],
+      "grade_level": "middle_school",
+      "prompt_type": "creative_writing"
+    }
+  },
+  {
+    "input_ids": [
+      16594,
+      546,
+      257,
+      37259,
+      1110,
+      326,
+      4962,
+      656,
+      1223,
+      10883,
+      13
+    ],
+    "target_ids": [
+      16594,
+      546,
+      257,
+      37259,
+      1110,
+      326,
+      4962,
+      656,
+      1223,
+      10883,
+      13
+    ],
+    "criteria": {
+      "story_elements": [
+        "plot",
+        "character",
+        "setting",
+        "conflict",
+        "resolution"
+      ],
+      "writing_mechanics": [
+        "grammar",
+        "punctuation",
+        "spelling"
+      ],
+      "creativity": [
+        "originality",
+        "imagination",
+        "engagement"
+      ],
+      "grade_level": "middle_school",
+      "prompt_type": "creative_writing"
+    }
+  },
+  {
+    "input_ids": [
+      24564,
+      4892,
+      257,
+      8179,
+      1524,
+      43075,
+      1262,
+      477,
+      1936,
+      17627,
+      13
+    ],
+    "target_ids": [
+      24564,
+      4892,
+      257,
+      8179,
+      1524,
+      43075,
+      1262,
+      477,
+      1936,
+      17627,
+      13
+    ],
+    "criteria": {
+      "story_elements": [
+        "plot",
+        "character",
+        "setting",
+        "conflict",
+        "resolution"
+      ],
+      "writing_mechanics": [
+        "grammar",
+        "punctuation",
+        "spelling"
+      ],
+      "creativity": [
+        "originality",
+        "imagination",
+        "engagement"
+      ],
+      "grade_level": "middle_school",
+      "prompt_type": "creative_writing"
+    }
+  },
+  {
+    "input_ids": [
+      16594,
+      546,
+      257,
+      15800,
+      3710,
+      508,
+      4329,
+      262,
+      4293,
+      286,
+      262,
+      1110,
+      13
+    ],
+    "target_ids": [
+      16594,
+      546,
+      257,
+      15800,
+      3710,
+      508,
+      4329,
+      262,
+      4293,
+      286,
+      262,
+      1110,
+      13
+    ],
+    "criteria": {
+      "story_elements": [
+        "plot",
+        "character",
+        "setting",
+        "conflict",
+        "resolution"
+      ],
+      "writing_mechanics": [
+        "grammar",
+        "punctuation",
+        "spelling"
+      ],
+      "creativity": [
+        "originality",
+        "imagination",
+        "engagement"
+      ],
+      "grade_level": "middle_school",
+      "prompt_type": "creative_writing"
+    }
+  },
+  {
+    "input_ids": [
+      16447,
+      257,
+      1621,
+      546,
+      734,
+      2460,
+      508,
+      423,
+      845,
+      1180,
+      20929,
+      13
+    ],
+    "target_ids": [
+      16447,
+      257,
+      1621,
+      546,
+      734,
+      2460,
+      508,
+      423,
+      845,
+      1180,
+      20929,
+      13
+    ],
+    "criteria": {
+      "story_elements": [
+        "plot",
+        "character",
+        "setting",
+        "conflict",
+        "resolution"
+      ],
+      "writing_mechanics": [
+        "grammar",
+        "punctuation",
+        "spelling"
+      ],
+      "creativity": [
+        "originality",
+        "imagination",
+        "engagement"
+      ],
+      "grade_level": "middle_school",
+      "prompt_type": "creative_writing"
+    }
+  },
+  {
+    "input_ids": [
+      24564,
+      4892,
+      257,
+      1110,
+      287,
+      262,
+      1204,
+      286,
+      534,
+      4273,
+      422,
+      511,
+      6650,
+      13
+    ],
+    "target_ids": [
+      24564,
+      4892,
+      257,
+      1110,
+      287,
+      262,
+      1204,
+      286,
+      534,
+      4273,
+      422,
+      511,
+      6650,
+      13
+    ],
+    "criteria": {
+      "story_elements": [
+        "plot",
+        "character",
+        "setting",
+        "conflict",
+        "resolution"
+      ],
+      "writing_mechanics": [
+        "grammar",
+        "punctuation",
+        "spelling"
+      ],
+      "creativity": [
+        "originality",
+        "imagination",
+        "engagement"
+      ],
+      "grade_level": "middle_school",
+      "prompt_type": "creative_writing"
+    }
+  },
+  {
+    "input_ids": [
+      2061,
+      611,
+      345,
+      714,
+      3292,
+      4113,
+      351,
+      534,
+      4701,
+      329,
+      257,
+      1110,
+      30
+    ],
+    "target_ids": [
+      2061,
+      611,
+      345,
+      714,
+      3292,
+      4113,
+      351,
+      534,
+      4701,
+      329,
+      257,
+      1110,
+      30
+    ],
+    "criteria": {
+      "story_elements": [
+        "plot",
+        "character",
+        "setting",
+        "conflict",
+        "resolution"
+      ],
+      "writing_mechanics": [
+        "grammar",
+        "punctuation",
+        "spelling"
+      ],
+      "creativity": [
+        "originality",
+        "imagination",
+        "engagement"
+      ],
+      "grade_level": "middle_school",
+      "prompt_type": "creative_writing"
+    }
+  },
+  {
+    "input_ids": [
+      25153,
+      345,
+      1043,
+      257,
+      11428,
+      5301,
+      287,
+      534,
+      17355,
+      986
+    ],
+    "target_ids": [
+      25153,
+      345,
+      1043,
+      257,
+      11428,
+      5301,
+      287,
+      534,
+      17355,
+      986
+    ],
+    "criteria": {
+      "story_elements": [
+        "plot",
+        "character",
+        "setting",
+        "conflict",
+        "resolution"
+      ],
+      "writing_mechanics": [
+        "grammar",
+        "punctuation",
+        "spelling"
+      ],
+      "creativity": [
+        "originality",
+        "imagination",
+        "engagement"
+      ],
+      "grade_level": "middle_school",
+      "prompt_type": "creative_writing"
+    }
+  },
+  {
+    "input_ids": [
+      16594,
+      546,
+      257,
+      2214,
+      5296,
+      326,
+      2925,
+      17570,
+      6819,
+      2642,
+      13
+    ],
+    "target_ids": [
+      16594,
+      546,
+      257,
+      2214,
+      5296,
+      326,
+      2925,
+      17570,
+      6819,
+      2642,
+      13
+    ],
+    "criteria": {
+      "story_elements": [
+        "plot",
+        "character",
+        "setting",
+        "conflict",
+        "resolution"
+      ],
+      "writing_mechanics": [
+        "grammar",
+        "punctuation",
+        "spelling"
+      ],
+      "creativity": [
+        "originality",
+        "imagination",
+        "engagement"
+      ],
+      "grade_level": "middle_school",
+      "prompt_type": "creative_writing"
+    }
+  }
+]

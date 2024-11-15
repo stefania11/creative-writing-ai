@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from templates.nanoGPT_lite.attention import MultiHeadAttention
+from .attention import MultiHeadAttention
 
 class Config:
     def __init__(self, vocab_size=50257, n_embd=768, n_head=12, n_layer=12, dropout=0.1):
