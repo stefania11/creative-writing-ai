@@ -1,0 +1,8 @@
+{
+  "vocab_size": 50257,
+  "n_embd": 768,
+  "n_head": 8,
+  "n_layer": 6,
+  "dropout": 0.1,
+  "max_position_embeddings": 512
+}

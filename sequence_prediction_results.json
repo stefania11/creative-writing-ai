@@ -1,0 +1,93 @@
+{
+  "individual_results": [
+    {
+      "prompt": "Write a story about a student who discovers a hidden talent.",
+      "target": "Sarah never thought she was special until the day she discovered she could paint with music. When she played the piano, colors swirled in her mind, creating beautiful landscapes on canvas. Her art teacher was amazed by her unique ability to translate melodies into visual masterpieces.",
+      "prediction": " immune Lia\ufffd\ufffd retain",
+      "loss": 10.858428001403809,
+      "accuracy": 0.0,
+      "quality_scores": {
+        "target": 0.6849999999999999,
+        "prediction": 0.3466666666666667
+      },
+      "metrics": {
+        "target": {
+          "sentence_structure": 1.0,
+          "vocabulary_level": 0.63,
+          "coherence": 0.42500000000000004
+        },
+        "prediction": {
+          "sentence_structure": 0.0,
+          "vocabulary_level": 0.51,
+          "coherence": 0.53
+        }
+      }
+    },
+    {
+      "prompt": "Describe your perfect day at school.",
+      "target": "My perfect school day started with an exciting science experiment where we learned about chemical reactions. During lunch, I shared stories with my friends, and in English class, we wrote creative poems about nature. The day ended with a fun basketball game in PE.",
+      "prediction": "esses Crush cyl DebtCooldown",
+      "loss": 10.924517631530762,
+      "accuracy": 0.0,
+      "quality_scores": {
+        "target": 0.6850841750841751,
+        "prediction": 0.3466666666666667
+      },
+      "metrics": {
+        "target": {
+          "sentence_structure": 1.0,
+          "vocabulary_level": 0.63,
+          "coherence": 0.42525252525252527
+        },
+        "prediction": {
+          "sentence_structure": 0.0,
+          "vocabulary_level": 0.51,
+          "coherence": 0.53
+        }
+      }
+    },
+    {
+      "prompt": "What would happen if animals could talk?",
+      "target": "If animals could talk, our world would be filled with amazing conversations. Dogs would share their adventures, cats would explain why they love sleeping in sunbeams, and birds would tell stories about their travels across continents. Every walk in the park would become an opportunity to learn from nature.",
+      "prediction": " Spoon addictedusters Tyrann addicted",
+      "loss": 10.634557723999023,
+      "accuracy": 0.0,
+      "quality_scores": {
+        "target": 0.6673611111111111,
+        "prediction": 0.3066666666666667
+      },
+      "metrics": {
+        "target": {
+          "sentence_structure": 1.0,
+          "vocabulary_level": 0.63,
+          "coherence": 0.3720833333333333
+        },
+        "prediction": {
+          "sentence_structure": 0.0,
+          "vocabulary_level": 0.39,
+          "coherence": 0.53
+        }
+      }
+    }
+  ],
+  "average_results": {
+    "avg_loss": 10.805834452311197,
+    "avg_accuracy": 0.0,
+    "avg_quality": {
+      "target": 0.6791484287317621,
+      "prediction": 0.3333333333333333
+    },
+    "avg_metrics": {
+      "target": {
+        "sentence_structure": 1.0,
+        "vocabulary_level": 0.63,
+        "coherence": 0.4074452861952862
+      },
+      "prediction": {
+        "sentence_structure": 0.0,
+        "vocabulary_level": 0.47000000000000003,
+        "coherence": 0.53
+      }
+    }
+  }
+}
