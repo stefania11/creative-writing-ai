@@ -1,6 +1,8 @@
 __pycache__/
 *.pyc
-checkpoints/
-*.pt
+venv/
+venv_testing/
+training_log*.txt
 .DS_Store
 *.log
+checkpoints/*.pt
