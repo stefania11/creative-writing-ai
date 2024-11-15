@@ -1,0 +1,37 @@
+{
+    "name": "middle_school_writing_validation",
+    "title": "Validating Creative Writing for Middle School Standards",
+    "experiment": {
+        "description": "Testing comprehensive validation system for middle school creative writing",
+        "validation_criteria": {
+            "content_quality": {
+                "theme_development": 0.7,
+                "plot_coherence": 0.7,
+                "character_depth": 0.7
+            },
+            "writing_mechanics": {
+                "grammar": 0.8,
+                "vocabulary": 0.7,
+                "sentence_structure": 0.7
+            },
+            "grade_level": {
+                "readability": "6-8",
+                "complexity": "age-appropriate"
+            }
+        },
+        "test_cases": [
+            {
+                "prompt": "Write a story about a student who discovers an unusual talent.",
+                "expected_elements": [
+                    "character development",
+                    "clear plot progression",
+                    "age-appropriate vocabulary",
+                    "proper grammar and structure"
+                ]
+            }
+        ]
+    },
+    "interestingness": 0.8,
+    "feasibility": 0.9,
+    "novelty": 0.7
+}
