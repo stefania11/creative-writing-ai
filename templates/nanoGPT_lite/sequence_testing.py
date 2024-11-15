@@ -5,6 +5,11 @@ import json
 import numpy as np
 from nltk.translate.bleu_score import sentence_bleu
 import nltk
+import os
+from openai import OpenAI
+import anthropic
+from typing import Dict, List, Any
+from rouge_score import rouge_scorer
 
 class SequenceValidator:
     def __init__(self, model_path=None):
@@ -12,6 +17,13 @@ class SequenceValidator:
         self.model = None
         if model_path:
             self.load_model(model_path)
+
+        # Initialize API clients
+        self.openai_client = OpenAI(api_key=os.environ.get('oai_key'))
+        self.anthropic_client = anthropic.Anthropic(api_key=os.environ.get('anthropic_key'))
+
+        # Initialize ROUGE scorer
+        self.rouge_scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
 
         # Download required NLTK data
         try:
@@ -32,7 +44,8 @@ class SequenceValidator:
         results = {
             'perplexity': [],
             'bleu_scores': [],
-            'completion_quality': []
+            'completion_quality': [],
+            'benchmark_comparisons': []
         }
 
         for sample in test_data:
@@ -49,14 +62,35 @@ class SequenceValidator:
                 loss = F.cross_entropy(logits.view(-1, logits.size(-1)), target_seq.view(-1))
                 perplexity = torch.exp(loss).item()
 
-                # Calculate BLEU score
+                # Get model generation
                 generated_text = self.decode_tokens(output[0].cpu().numpy())
                 target_text = self.decode_tokens(target_seq[0].cpu().numpy())
+                input_text = self.decode_tokens(input_seq[0].cpu().numpy())
+
+                # Get benchmark responses
+                benchmark_responses = self.get_benchmark_responses(input_text)
+
+                # Calculate BLEU and ROUGE scores
                 bleu_score = sentence_bleu([target_text.split()], generated_text.split())
+                rouge_scores = {}
+                for name, response in benchmark_responses.items():
+                    scores = self.rouge_scorer.score(generated_text, response)
+                    rouge_scores[name] = {
+                        'rouge1': scores['rouge1'].fmeasure,
+                        'rouge2': scores['rouge2'].fmeasure,
+                        'rougeL': scores['rougeL'].fmeasure
+                    }
 
                 # Store results
                 results['perplexity'].append(perplexity)
                 results['bleu_scores'].append(bleu_score)
+                results['benchmark_comparisons'].append({
+                    'input': input_text,
+                    'generated': generated_text,
+                    'target': target_text,
+                    'benchmark_responses': benchmark_responses,
+                    'rouge_scores': rouge_scores
+                })
 
                 # Evaluate completion quality
                 quality_score = self.evaluate_completion_quality(generated_text)
@@ -65,7 +99,8 @@ class SequenceValidator:
         return {
             'avg_perplexity': np.mean(results['perplexity']),
             'avg_bleu': np.mean(results['bleu_scores']),
-            'avg_quality': np.mean(results['completion_quality'])
+            'avg_quality': np.mean(results['completion_quality']),
+            'detailed_results': results['benchmark_comparisons']
         }
 
     def evaluate_completion_quality(self, text):
@@ -198,6 +233,44 @@ class SequenceValidator:
             print(f"Warning: Token decoding failed - {str(e)}")
             return "[DECODING_ERROR]"
 
+    def get_benchmark_responses(self, prompt: str) -> Dict[str, str]:
+        """Get responses from benchmark models (GPT-4 and Claude)"""
+        try:
+            # OpenAI GPT-4 response
+            gpt4_response = self.openai_client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are a creative writing assistant for middle school students."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+
+            # Anthropic Claude response
+            claude_response = self.anthropic_client.messages.create(
+                model="claude-3-opus-20240229",
+                max_tokens=1000,
+                messages=[{
+                    "role": "user",
+                    "content": f"As a creative writing assistant for middle school students, continue this story: {prompt}"
+                }]
+            )
+
+            return {
+                "gpt4": gpt4_response.choices[0].message.content,
+                "claude": claude_response.content[0].text
+            }
+        except Exception as e:
+            print(f"Warning: Benchmark response generation failed - {str(e)}")
+            return {"gpt4": "", "claude": ""}
+
 if __name__ == "__main__":
     validator = SequenceValidator()
-    # Add test execution code here
+    # Example test data
+    test_data = [
+        {
+            "input_ids": [100, 200, 300],  # Example token IDs
+            "target_ids": [400, 500, 600]   # Example target IDs
+        }
+    ]
+    results = validator.evaluate_sequence_prediction(test_data)
+    print("Evaluation Results:", json.dumps(results, indent=2))

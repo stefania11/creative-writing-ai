@@ -36,6 +36,9 @@ class CreativeWritingTransformer(nn.Module):
 
         # Initialize tokenizer first
         self.tokenizer = self.get_tokenizer()
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+            vocab_size = max(vocab_size, self.tokenizer.vocab_size)
 
         # Token embeddings with proper padding token
         self.tok_emb = nn.Embedding(vocab_size, n_embd, padding_idx=self.tokenizer.pad_token_id)
