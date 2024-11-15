@@ -2,7 +2,11 @@
   "samples": [
     {
       "prompt": "Write a story about a magical library",
-      "target": "In the heart of an ancient city stood a library unlike any other..."
+      "target": "In the heart of an ancient city stood a library unlike any other. Its towering shelves reached toward the ceiling, filled with books that whispered their secrets to curious readers. Young students would spend hours exploring the dusty corners, discovering tales of adventure and wonder. The librarian, a wise woman with silver hair, knew every book by heart and guided visitors to exactly what they needed."
+    },
+    {
+      "prompt": "Describe your perfect day",
+      "target": "My perfect day begins with the sun peeking through my window. After a healthy breakfast, I meet my friends at the park where we play basketball and share stories. Later, we work on our science project, experimenting with different chemical reactions. The day ends with my family gathering for dinner, sharing laughs and planning our next adventure."
     }
   ]
 }
