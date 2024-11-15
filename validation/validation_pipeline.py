@@ -1,73 +1,60 @@
 """
-Comprehensive validation pipeline for middle school writing evaluation.
+Validation pipeline for middle school creative writing assessment.
 """
+import spacy
+import textstat
 from typing import Dict, Any
-from .metrics.scoring_logic import WritingScorer
-from .metrics.writing_metrics import MiddleSchoolMetrics
 
 class ValidationPipeline:
     def __init__(self):
-        self.scorer = WritingScorer()
-        self.metrics = MiddleSchoolMetrics()
+        self.nlp = spacy.load('en_core_web_sm')
 
     def validate_text(self, text: str) -> Dict[str, Any]:
         """Run comprehensive validation on text."""
-        content_scores = self.scorer.score_content(text)
-        writing_scores = self.metrics.get_comprehensive_score(text)
-
-        # Combine scores with middle school specific criteria
-        validation_results = {
-            'content_analysis': content_scores,
-            'writing_evaluation': writing_scores,
-            'grade_level_assessment': {
-                'readability': content_scores['readability'],
-                'meets_standards': self._check_grade_standards(content_scores, writing_scores)
-            }
+        doc = self.nlp(text)
+        return {
+            'grade_level_assessment': self._assess_grade_level(text),
+            'content_analysis': self._analyze_content(doc),
+            'writing_evaluation': self._evaluate_writing(doc)
         }
 
-        return validation_results
+    def _assess_grade_level(self, text: str) -> Dict[str, float]:
+        """Assess grade level appropriateness."""
+        return {
+            'readability': textstat.flesch_kincaid_grade(text),
+            'complexity': textstat.gunning_fog(text),
+            'reading_ease': textstat.flesch_reading_ease(text)
+        }
 
-    def _check_grade_standards(self, content: Dict[str, float],
-                             writing: Dict[str, Any]) -> bool:
-        """Check if text meets middle school standards."""
-        # Grade level between 6-8
-        grade_appropriate = 6 <= content['readability'] <= 8
+    def _analyze_content(self, doc) -> Dict[str, float]:
+        """Analyze content quality and structure."""
+        sentences = len(list(doc.sents))
+        words = len([token for token in doc if not token.is_punct])
+        return {
+            'coherence': min(1.0, sentences / 20),
+            'vocabulary_diversity': len(set([token.text.lower() for token in doc if not token.is_punct])) / words,
+            'sentence_complexity': sum(len(list(sent)) for sent in doc.sents) / sentences
+        }
 
-        # Check writing criteria
-        writing_criteria = all(
-            score >= 0.7 for scores in writing.values()
-            for score in scores.values()
-        )
+    def _evaluate_writing(self, doc) -> Dict[str, Dict[str, float]]:
+        """Evaluate writing mechanics and style."""
+        return {
+            'mechanics': self._check_mechanics(doc),
+            'style': self._analyze_style(doc)
+        }
 
-        return grade_appropriate and writing_criteria
+    def _check_mechanics(self, doc) -> Dict[str, float]:
+        total_sentences = len(list(doc.sents))
+        return {
+            'grammar': 1.0,  # Placeholder for now
+            'punctuation': sum(1 for token in doc if token.is_punct) / total_sentences,
+            'capitalization': sum(1 for token in doc if token.text[0].isupper()) / total_sentences
+        }
 
-    def generate_report(self, text: str) -> str:
-        """Generate detailed validation report."""
-        results = self.validate_text(text)
-
-        report = ["=== Writing Validation Report ===\n"]
-        report.append("Content Analysis:")
-        for metric, score in results['content_analysis'].items():
-            report.append(f"- {metric}: {score:.2f}")
-
-        report.append("\nWriting Evaluation:")
-        for category, scores in results['writing_evaluation'].items():
-            report.append(f"\n{category}:")
-            for aspect, score in scores.items():
-                report.append(f"- {aspect}: {score:.2f}")
-
-        report.append(f"\nGrade Level Assessment:")
-        report.append(f"- Readability: Grade {results['grade_level_assessment']['readability']:.1f}")
-        report.append(f"- Meets Standards: {'Yes' if results['grade_level_assessment']['meets_standards'] else 'No'}")
-
-        return "\n".join(report)
-
-if __name__ == "__main__":
-    validator = ValidationPipeline()
-    test_text = """
-    The old bicycle stood in the corner of the garage, its once-shiny frame now
-    covered in dust. Sarah remembered the summer days when she and her best friend
-    would ride for hours, exploring every street in their neighborhood. Now, as she
-    touched the handlebars, memories flooded back like warm sunshine.
-    """
-    print(validator.generate_report(test_text))
+    def _analyze_style(self, doc) -> Dict[str, float]:
+        total_words = len([token for token in doc if not token.is_punct])
+        return {
+            'vocabulary_level': sum(len(token.text) for token in doc if not token.is_punct) / total_words,
+            'sentence_variety': len(set(sent.root.pos_ for sent in doc.sents)) / len(list(doc.sents)),
+            'descriptive_richness': len([token for token in doc if token.pos_ in ['ADJ', 'ADV']]) / total_words
+        }
