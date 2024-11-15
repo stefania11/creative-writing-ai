@@ -10,6 +10,9 @@ from openai import OpenAI
 import anthropic
 from typing import Dict, List, Any
 from rouge_score import rouge_scorer
+from .evaluation_metrics import (_evaluate_story_elements, _evaluate_writing_mechanics,
+                               _evaluate_creativity, _check_grade_level,
+                               _calculate_avg_metric, _summarize_writing_metrics)
 
 class SequenceValidator:
     def __init__(self, model_path=None):
@@ -34,18 +37,28 @@ class SequenceValidator:
     def load_model(self, model_path):
         """Load trained model"""
         checkpoint = torch.load(model_path, map_location=self.device)
-        self.model = CreativeWritingTransformer(**checkpoint['model_config'])
+        self.model = CreativeWritingTransformer(
+            vocab_size=checkpoint['vocab_size'],
+            n_embd=checkpoint['n_embd'],
+            n_head=checkpoint['n_head'],
+            n_layer=checkpoint['n_layer'],
+            dropout=checkpoint['dropout']
+        )
         self.model.load_state_dict(checkpoint['model_state_dict'])
+        self._tokenizer = checkpoint.get('tokenizer', None)  # Try to get saved tokenizer
+        if self._tokenizer is None:
+            self._tokenizer = self.model.get_tokenizer()
         self.model.to(self.device)
         self.model.eval()
 
     def evaluate_sequence_prediction(self, test_data, max_length=100):
-        """Evaluate model's sequence prediction capabilities"""
+        """Evaluate model's sequence prediction capabilities with middle school writing standards"""
         results = {
             'perplexity': [],
             'bleu_scores': [],
             'completion_quality': [],
-            'benchmark_comparisons': []
+            'benchmark_comparisons': [],
+            'writing_metrics': []  # New field for detailed writing evaluation
         }
 
         for sample in test_data:
@@ -81,25 +94,41 @@ class SequenceValidator:
                         'rougeL': scores['rougeL'].fmeasure
                     }
 
+                # Evaluate writing quality for middle school standards
+                writing_metrics = {
+                    'story_elements': self._evaluate_story_elements(generated_text),
+                    'writing_mechanics': self._evaluate_writing_mechanics(generated_text),
+                    'creativity': self._evaluate_creativity(generated_text, input_text),
+                    'grade_level_appropriateness': self._check_grade_level(generated_text)
+                }
+
                 # Store results
                 results['perplexity'].append(perplexity)
                 results['bleu_scores'].append(bleu_score)
+                results['writing_metrics'].append(writing_metrics)
                 results['benchmark_comparisons'].append({
                     'input': input_text,
                     'generated': generated_text,
                     'target': target_text,
                     'benchmark_responses': benchmark_responses,
-                    'rouge_scores': rouge_scores
+                    'rouge_scores': rouge_scores,
+                    'writing_evaluation': writing_metrics
                 })
 
-                # Evaluate completion quality
-                quality_score = self.evaluate_completion_quality(generated_text)
+                # Calculate overall quality score
+                quality_score = (
+                    0.3 * self._calculate_avg_metric(writing_metrics['story_elements']) +
+                    0.3 * self._calculate_avg_metric(writing_metrics['writing_mechanics']) +
+                    0.2 * self._calculate_avg_metric(writing_metrics['creativity']) +
+                    0.2 * writing_metrics['grade_level_appropriateness']
+                )
                 results['completion_quality'].append(quality_score)
 
         return {
             'avg_perplexity': np.mean(results['perplexity']),
             'avg_bleu': np.mean(results['bleu_scores']),
             'avg_quality': np.mean(results['completion_quality']),
+            'writing_metrics_summary': self._summarize_writing_metrics(results['writing_metrics']),
             'detailed_results': results['benchmark_comparisons']
         }
 
