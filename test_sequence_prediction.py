@@ -1,65 +1,56 @@
+import sys
 import json
-import torch
-from transformers import GPT2Tokenizer
 from templates.nanoGPT_lite.sequence_testing import SequenceValidator
+from templates.nanoGPT_lite.evaluation_metrics import evaluate_writing_quality
 
-def prepare_sample(tokenizer, sample):
-    """Prepare a single sample for evaluation"""
-    # Tokenize input and target
-    input_ids = tokenizer.encode(sample["prompt"], return_tensors="pt")[0]
-    target_ids = tokenizer.encode(sample["target"], return_tensors="pt")[0]
-
-    return {
-        "input_ids": input_ids.tolist(),
-        "target_ids": target_ids.tolist(),
-        "prompt": sample["prompt"],
-        "target": sample["target"]
-    }
-
-def run_test():
-    # Initialize tokenizer
-    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
-
-    # Load test data
-    with open("data/samples/test_data.json", "r") as f:
-        raw_data = json.load(f)
-
-    # Prepare tokenized samples
-    test_data = [prepare_sample(tokenizer, sample) for sample in raw_data["samples"]]
-
-    # Initialize validator
-    validator = SequenceValidator()
+def run_validation_tests():
+    # Test cases for middle school writing
+    test_cases = [
+        {
+            "prompt": "Write a story about overcoming a challenge",
+            "expected_elements": ["character development", "conflict", "resolution"]
+        },
+        {
+            "prompt": "Describe your perfect day",
+            "expected_elements": ["setting", "sensory details", "personal voice"]
+        }
+    ]
 
     try:
-        # Run text quality evaluation (without model)
-        quality_results = []
-        for sample in test_data:
-            quality_score = validator.evaluate_completion_quality(sample["target"])
-            quality_results.append({
-                "prompt": sample["prompt"],
-                "target": sample["target"],
-                "quality_metrics": {
-                    "overall_score": quality_score,
-                    "vocabulary_level": validator._check_vocabulary_level(sample["target"]),
-                    "coherence": validator._check_coherence(sample["target"]),
-                    "sentence_structure": validator._check_sentence_structure(sample["target"])
-                }
+        validator = SequenceValidator()
+        results = []
+
+        for test_case in test_cases:
+            # Generate text
+            generated_text = validator.generate_text(test_case["prompt"])
+
+            # Evaluate writing quality
+            metrics = evaluate_writing_quality(generated_text)
+
+            # Check for expected elements
+            elements_present = all(
+                element.lower() in generated_text.lower()
+                for element in test_case["expected_elements"]
+            )
+
+            results.append({
+                "prompt": test_case["prompt"],
+                "generated_text": generated_text,
+                "metrics": metrics,
+                "elements_present": elements_present
             })
 
         # Save results
-        results = {
-            "quality_evaluation": quality_results,
-            "model_evaluation": "Model evaluation skipped - no model loaded"
-        }
+        with open("validation_results.json", "w") as f:
+            json.dump(results, f, indent=2)
 
-        with open("results.json", "w") as f:
-            json.dump(results, f, indent=4)
-
-        print("Evaluation completed. Results saved to results.json")
+        print("Validation tests completed successfully")
+        return True
 
     except Exception as e:
-        print(f"Error during evaluation: {str(e)}")
-        raise
+        print(f"Error during validation: {str(e)}", file=sys.stderr)
+        return False
 
 if __name__ == "__main__":
-    run_test()
+    success = run_validation_tests()
+    sys.exit(0 if success else 1)

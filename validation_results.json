@@ -1,0 +1,60 @@
+[
+  {
+    "prompt": "Write a story about overcoming a challenge",
+    "generated_text": "Generated text for prompt: Write a story about overcoming a challenge",
+    "metrics": {
+      "story_elements": {
+        "plot_development": 0.7,
+        "character_depth": 0.7,
+        "setting_description": 0.7,
+        "conflict_resolution": 0.7
+      },
+      "mechanics": {
+        "grammar_usage": 0.8,
+        "punctuation_usage": 0.8,
+        "sentence_structure": 0.8
+      },
+      "creativity": {
+        "originality": 0.7,
+        "vocabulary_usage": 0.7,
+        "emotional_impact": 0.7
+      },
+      "grade_level": {
+        "avg_word_length": 5.363636363636363,
+        "avg_sentence_length": 11.0,
+        "vocabulary_complexity": 0.7,
+        "grade_appropriate": true
+      }
+    },
+    "elements_present": false
+  },
+  {
+    "prompt": "Describe your perfect day",
+    "generated_text": "Generated text for prompt: Describe your perfect day",
+    "metrics": {
+      "story_elements": {
+        "plot_development": 0.7,
+        "character_depth": 0.7,
+        "setting_description": 0.7,
+        "conflict_resolution": 0.7
+      },
+      "mechanics": {
+        "grammar_usage": 0.8,
+        "punctuation_usage": 0.8,
+        "sentence_structure": 0.8
+      },
+      "creativity": {
+        "originality": 0.7,
+        "vocabulary_usage": 0.7,
+        "emotional_impact": 0.7
+      },
+      "grade_level": {
+        "avg_word_length": 5.625,
+        "avg_sentence_length": 8.0,
+        "vocabulary_complexity": 0.7,
+        "grade_appropriate": true
+      }
+    },
+    "elements_present": false
+  }
+]
