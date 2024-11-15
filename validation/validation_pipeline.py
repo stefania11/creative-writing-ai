@@ -1,5 +1,5 @@
 """
-Validation pipeline for assessing creative writing against middle school standards.
+Validation pipeline for creative writing assessment.
 """
 import spacy
 import textstat
@@ -7,78 +7,98 @@ from typing import Dict, Any
 
 class ValidationPipeline:
     def __init__(self):
-        """Initialize the validation pipeline with required models."""
-        self.nlp = spacy.load("en_core_web_sm")
+        """Initialize the validation pipeline with spaCy model."""
+        self.nlp = spacy.load('en_core_web_sm')
 
     def validate_text(self, text: str) -> Dict[str, Any]:
         """
         Validate text against middle school writing standards.
-        Returns comprehensive metrics about the text quality.
         """
         doc = self.nlp(text)
 
-        return {
-            'grade_level_assessment': self._assess_grade_level(text),
-            'content_analysis': self._analyze_content(doc),
-            'writing_mechanics': self._check_mechanics(doc),
-            'creativity_metrics': self._assess_creativity(doc)
-        }
-
-    def _assess_grade_level(self, text: str) -> Dict[str, float]:
-        """Assess the grade level of the text."""
-        return {
-            'readability': textstat.flesch_kincaid_grade(text),
-            'reading_ease': textstat.flesch_reading_ease(text),
-            'grade_level': textstat.coleman_liau_index(text)
-        }
-
-    def _analyze_content(self, doc) -> Dict[str, float]:
-        """Analyze content quality and structure."""
         # Calculate basic metrics
-        sentences = len(list(doc.sents))
-        words = len([token for token in doc if not token.is_punct])
+        word_count = len([token for token in doc if not token.is_punct])
+        sentence_count = len(list(doc.sents))
 
-        # Analyze sentence structure
-        sentence_lengths = [len([token for token in sent if not token.is_punct])
-                          for sent in doc.sents]
-        avg_sentence_length = sum(sentence_lengths) / len(sentence_lengths) if sentence_lengths else 0
-
-        return {
-            'coherence': min(1.0, sentences / 20),  # Normalize to 0-1
-            'vocabulary_diversity': len(set([token.text.lower() for token in doc
-                                          if not token.is_punct])) / words if words > 0 else 0,
-            'sentence_complexity': avg_sentence_length / 15  # Normalize to typical middle school length
+        # Grade level assessment
+        grade_level = {
+            'readability': textstat.flesch_kincaid_grade(text),
+            'complexity': textstat.gunning_fog(text),
+            'reading_ease': textstat.flesch_reading_ease(text)
         }
 
-    def _check_mechanics(self, doc) -> Dict[str, float]:
-        """Check writing mechanics (grammar, punctuation, etc.)."""
-        sentences = list(doc.sents)
-        total_sentences = len(sentences)
+        # Content analysis
+        content_analysis = self._analyze_content(doc, word_count, sentence_count)
 
-        # Check for basic punctuation and capitalization
-        proper_endings = sum(1 for sent in sentences
-                           if sent.text.strip()[-1] in {'.', '!', '?'})
-        capitalized = sum(1 for sent in sentences
-                         if sent.text.strip()[0].isupper())
+        # Writing mechanics
+        writing_mechanics = self._analyze_mechanics(doc)
 
         return {
-            'punctuation': proper_endings / total_sentences if total_sentences > 0 else 0,
-            'capitalization': capitalized / total_sentences if total_sentences > 0 else 0,
-            'grammar_score': 0.8  # Placeholder - would need more sophisticated grammar checking
+            'grade_level_assessment': grade_level,
+            'content_analysis': content_analysis,
+            'writing_mechanics': writing_mechanics,
+            'statistics': {
+                'word_count': word_count,
+                'sentence_count': sentence_count,
+                'avg_words_per_sentence': word_count / sentence_count if sentence_count > 0 else 0
+            }
         }
 
-    def _assess_creativity(self, doc) -> Dict[str, float]:
-        """Assess creative elements of the writing."""
-        # Count unique descriptive words (adjectives and adverbs)
-        descriptive_words = set([token.text.lower() for token in doc
-                               if token.pos_ in {'ADJ', 'ADV'}])
+    def _analyze_content(self, doc, word_count: int, sentence_count: int) -> Dict[str, float]:
+        """Analyze content quality metrics."""
+        # Vocabulary diversity
+        unique_words = len({token.text.lower() for token in doc if not token.is_punct})
+        vocabulary_diversity = unique_words / word_count if word_count > 0 else 0
 
-        # Count dialogue instances
-        dialogue_count = sum(1 for token in doc if token.text in {'"', '"', '"'}) / 2
+        # Sentence complexity
+        avg_sentence_length = word_count / sentence_count if sentence_count > 0 else 0
+        sentence_complexity = min(1.0, avg_sentence_length / 20)  # Normalize to 0-1
+
+        # Coherence (based on proper sentence structure)
+        proper_sentences = sum(1 for sent in doc.sents if self._is_proper_sentence(sent))
+        coherence = proper_sentences / sentence_count if sentence_count > 0 else 0
 
         return {
-            'descriptive_richness': len(descriptive_words) / len(doc) if len(doc) > 0 else 0,
-            'dialogue_usage': min(1.0, dialogue_count / 5),  # Normalize to 0-1
-            'vocabulary_sophistication': 0.7  # Placeholder - would need more sophisticated analysis
+            'vocabulary_diversity': vocabulary_diversity,
+            'sentence_complexity': sentence_complexity,
+            'coherence': coherence
         }
 
+    def _analyze_mechanics(self, doc) -> Dict[str, float]:
+        """Analyze writing mechanics."""
+        total_tokens = len(doc)
+        if total_tokens == 0:
+            return {'grammar': 0.0, 'punctuation': 0.0, 'spelling': 0.0}
+
+        # Grammar check (simplified)
+        grammar_errors = sum(1 for token in doc if token.dep_ == 'ROOT' and token.pos_ not in ['VERB', 'AUX'])
+        grammar_score = 1.0 - (grammar_errors / total_tokens)
+
+        # Punctuation check
+        punct_tokens = [token for token in doc if token.is_punct]
+        expected_punct = len(list(doc.sents))  # At least one punctuation per sentence
+        punct_score = min(1.0, len(punct_tokens) / expected_punct if expected_punct > 0 else 0)
+
+        # Spelling check (using spaCy's token.is_oov)
+        misspelled = sum(1 for token in doc if not token.is_punct and token.is_oov)
+        spelling_score = 1.0 - (misspelled / total_tokens)
+
+        return {
+            'grammar': max(0.0, min(1.0, grammar_score)),
+            'punctuation': max(0.0, min(1.0, punct_score)),
+            'spelling': max(0.0, min(1.0, spelling_score))
+        }
+
+    def _is_proper_sentence(self, sent) -> bool:
+        """Check if a sentence has proper structure."""
+        # Basic check for subject-verb structure
+        has_subject = False
+        has_verb = False
+
+        for token in sent:
+            if token.dep_ in ['nsubj', 'nsubjpass']:
+                has_subject = True
+            if token.pos_ == 'VERB':
+                has_verb = True
+
+        return has_subject and has_verb
