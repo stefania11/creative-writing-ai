@@ -1,4 +1,3 @@
-import json
 from validation.experiment.model_integration import CreativeWritingModelValidator, TEST_PROMPTS
 
 def main():
@@ -6,19 +5,15 @@ def main():
     validator = CreativeWritingModelValidator()
     results = validator.generate_and_validate(TEST_PROMPTS)
 
+    # Print summary
     print("\nValidation Results Summary:")
     print("==========================")
-    print(f"Total test cases: {results['overall_performance']['total_cases']}")
-    print(f"Passing cases: {results['overall_performance']['passing_cases']}")
-    print(f"Success rate: {results['overall_performance']['success_rate']:.2f}%")
-
-    print("\nDetailed Results:")
-    for prompt, case_results in results['test_cases'].items():
-        print(f"\nPrompt: {prompt}")
-        print(f"Meets criteria: {case_results['meets_criteria']}")
-        if 'validation_results' in case_results:
-            print("Validation metrics:")
-            print(json.dumps(case_results['validation_results'], indent=2))
+    for prompt, result in results['test_cases'].items():
+        print(f"\nPrompt: {prompt[:50]}...")
+        print(f"Text Length: {len(result['generated_text'])} chars")
+        print("Validation Metrics:")
+        for metric_type, metrics in result['validation_results'].items():
+            print(f"- {metric_type}: {metrics}")
 
 if __name__ == "__main__":
     main()
