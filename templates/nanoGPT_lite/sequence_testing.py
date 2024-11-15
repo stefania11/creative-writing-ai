@@ -3,7 +3,6 @@ import torch.nn.functional as F
 from templates.nanoGPT_lite.transformer_model import CreativeWritingTransformer
 import json
 import numpy as np
-from sklearn.metrics import accuracy_score
 from nltk.translate.bleu_score import sentence_bleu
 import nltk
 

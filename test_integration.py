@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 import numpy as np
 from templates.nanoGPT_lite.transformer_model import CreativeWritingTransformer
 from templates.nanoGPT_lite.sequence_testing import SequenceValidator
@@ -77,79 +78,152 @@ def test_model_generation():
 
 def test_sequence_prediction():
     """Test the model's sequence prediction capabilities"""
+    print("\nStarting sequence prediction testing...")
+
     # Load test data
     try:
         with open('data/samples/test_data.json', 'r') as f:
             test_data = json.load(f)
             test_samples = test_data['samples']
+            print(f"Loaded {len(test_samples)} test samples")
     except FileNotFoundError:
         print("Test data not found. Please ensure test_data.json exists in data/samples/")
         return
     except KeyError:
         print("Invalid test data format. Expected 'samples' key in test_data.json")
         return
+    except Exception as e:
+        print(f"Error loading test data: {str(e)}")
+        return
 
     # Initialize model and validator
-    model_config = {
-        'vocab_size': 50257,
-        'n_embd': 256,
-        'n_head': 8,
-        'n_layer': 4,
-        'dropout': 0.1
-    }
+    try:
+        model_config = {
+            'vocab_size': 50257,
+            'n_embd': 256,
+            'n_head': 8,
+            'n_layer': 4,
+            'dropout': 0.1
+        }
+        print("Initializing model with config:", model_config)
 
-    model = CreativeWritingTransformer(**model_config)
-    validator = SequenceValidator()
+        model = CreativeWritingTransformer(**model_config)
+        validator = SequenceValidator()
+        print("Model and validator initialized successfully")
+    except Exception as e:
+        print(f"Error initializing model or validator: {str(e)}")
+        return
 
     # Test sequence prediction
     try:
         results = []
-        for sample in test_samples:
-            # Convert sample data to tensors
-            input_tensor = torch.tensor(sample['input_ids']).unsqueeze(0)
-            target_tensor = torch.tensor(sample['target_ids']).unsqueeze(0)
+        for i, sample in enumerate(test_samples, 1):
+            print(f"\nProcessing sample {i}/{len(test_samples)}")
 
-            # Get model predictions
-            with torch.no_grad():
-                logits = model(input_tensor)
-                loss = torch.nn.functional.cross_entropy(
-                    logits.view(-1, logits.size(-1)),
-                    target_tensor.view(-1)
-                )
+            try:
+                # Convert sample data to tensors
+                input_tensor = torch.tensor(sample['input_ids']).unsqueeze(0)
+                target_tensor = torch.tensor(sample['target_ids']).unsqueeze(0)
 
-            # Evaluate quality of target text
-            quality_score = validator.evaluate_completion_quality(sample['target'])
+                # Get model predictions
+                with torch.no_grad():
+                    output = model(input_tensor, target_tensor)
+                    if isinstance(output, tuple):
+                        logits, loss = output
+                    else:
+                        logits = output
+                        loss = F.cross_entropy(
+                            logits.view(-1, logits.size(-1)),
+                            target_tensor.view(-1)
+                        )
 
-            result = {
-                'prompt': sample['prompt'],
-                'target': sample['target'],
-                'loss': float(loss.item()),
-                'quality_score': quality_score,
-                'metrics': {
-                    'sentence_structure': validator._check_sentence_structure(sample['target']),
-                    'vocabulary_level': validator._check_vocabulary_level(sample['target']),
-                    'coherence': validator._check_coherence(sample['target'])
+                    # Calculate prediction accuracy
+                    pred_tokens = torch.argmax(logits, dim=-1)
+                    accuracy = (pred_tokens == target_tensor).float().mean().item()
+
+                # Decode predictions for comparison
+                tokenizer = model.get_tokenizer()
+                pred_text = tokenizer.decode(pred_tokens[0], skip_special_tokens=True)
+
+                # Evaluate quality
+                quality_score = validator.evaluate_completion_quality(sample['target'])
+                pred_quality = validator.evaluate_completion_quality(pred_text)
+
+                result = {
+                    'prompt': sample['prompt'],
+                    'target': sample['target'],
+                    'prediction': pred_text,
+                    'loss': float(loss.item()),
+                    'accuracy': accuracy,
+                    'quality_scores': {
+                        'target': quality_score,
+                        'prediction': pred_quality
+                    },
+                    'metrics': {
+                        'target': {
+                            'sentence_structure': validator._check_sentence_structure(sample['target']),
+                            'vocabulary_level': validator._check_vocabulary_level(sample['target']),
+                            'coherence': validator._check_coherence(sample['target'])
+                        },
+                        'prediction': {
+                            'sentence_structure': validator._check_sentence_structure(pred_text),
+                            'vocabulary_level': validator._check_vocabulary_level(pred_text),
+                            'coherence': validator._check_coherence(pred_text)
+                        }
+                    }
                 }
-            }
-            results.append(result)
+                results.append(result)
 
-            print(f"\nPrompt: {sample['prompt']}")
-            print(f"Target: {sample['target']}")
-            print(f"Loss: {result['loss']:.4f}")
-            print(f"Quality Score: {quality_score:.2f}")
-            print("Detailed Metrics:")
-            for metric, score in result['metrics'].items():
-                print(f"- {metric}: {score:.2f}")
+                # Print sample results
+                print(f"Sample {i} Results:")
+                print(f"Prompt: {sample['prompt']}")
+                print(f"Target: {sample['target']}")
+                print(f"Prediction: {pred_text}")
+                print(f"Loss: {result['loss']:.4f}")
+                print(f"Accuracy: {accuracy:.4f}")
+                print(f"Quality Scores - Target: {quality_score:.2f}, Prediction: {pred_quality:.2f}")
+
+            except Exception as e:
+                print(f"Error processing sample {i}: {str(e)}")
+                continue
+
+        if not results:
+            print("No successful predictions to analyze")
+            return
 
         # Calculate averages
         avg_results = {
             'avg_loss': float(np.mean([r['loss'] for r in results])),
-            'avg_quality': float(np.mean([r['quality_score'] for r in results])),
+            'avg_accuracy': float(np.mean([r['accuracy'] for r in results])),
+            'avg_quality': {
+                'target': float(np.mean([r['quality_scores']['target'] for r in results])),
+                'prediction': float(np.mean([r['quality_scores']['prediction'] for r in results]))
+            },
             'avg_metrics': {
-                metric: float(np.mean([r['metrics'][metric] for r in results]))
-                for metric in results[0]['metrics']
+                'target': {
+                    metric: float(np.mean([r['metrics']['target'][metric] for r in results]))
+                    for metric in results[0]['metrics']['target']
+                },
+                'prediction': {
+                    metric: float(np.mean([r['metrics']['prediction'][metric] for r in results]))
+                    for metric in results[0]['metrics']['prediction']
+                }
             }
         }
+
+        # Print summary
+        print("\nTest Summary:")
+        print(f"Processed {len(results)}/{len(test_samples)} samples successfully")
+        print(f"Average Loss: {avg_results['avg_loss']:.4f}")
+        print(f"Average Accuracy: {avg_results['avg_accuracy']:.4f}")
+        print("Average Quality Scores:")
+        print(f"- Target: {avg_results['avg_quality']['target']:.2f}")
+        print(f"- Prediction: {avg_results['avg_quality']['prediction']:.2f}")
+        print("Average Metrics:")
+        for category in ['target', 'prediction']:
+            print(f"\n{category.title()} Metrics:")
+            for metric, score in avg_results['avg_metrics'][category].items():
+                print(f"- {metric}: {score:.2f}")
 
         # Save results
         with open('sequence_prediction_results.json', 'w') as f:
@@ -157,13 +231,7 @@ def test_sequence_prediction():
                 'individual_results': results,
                 'average_results': avg_results
             }, f, indent=2)
-
-        print("\nAverage Results:")
-        print(f"Average Loss: {avg_results['avg_loss']:.4f}")
-        print(f"Average Quality Score: {avg_results['avg_quality']:.2f}")
-        print("Average Metrics:")
-        for metric, score in avg_results['avg_metrics'].items():
-            print(f"- {metric}: {score:.2f}")
+        print("\nResults saved to sequence_prediction_results.json")
 
     except Exception as e:
         print(f"Error in sequence prediction testing: {str(e)}")

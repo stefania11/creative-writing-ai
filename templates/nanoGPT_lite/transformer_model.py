@@ -34,24 +34,34 @@ class CreativeWritingTransformer(nn.Module):
         super().__init__()
         self.config = Config(vocab_size, n_embd, n_head, n_layer, dropout)
 
-        # Token embeddings
-        self.tok_emb = nn.Embedding(vocab_size, n_embd)
+        # Initialize tokenizer first
+        self.tokenizer = self.get_tokenizer()
+
+        # Token embeddings with proper padding token
+        self.tok_emb = nn.Embedding(vocab_size, n_embd, padding_idx=self.tokenizer.pad_token_id)
         self.pos_emb = nn.Parameter(torch.zeros(1, 1024, n_embd))
         self.drop = nn.Dropout(dropout)
 
-        # Transformer blocks
+        # Layer normalization before transformer blocks
+        self.ln_0 = nn.LayerNorm(n_embd)
+
+        # Transformer blocks with gradient checkpointing for memory efficiency
         self.blocks = nn.ModuleList([TransformerBlock(self.config) for _ in range(n_layer)])
 
         # Final layer norm and output projection
         self.ln_f = nn.LayerNorm(n_embd)
         self.head = nn.Linear(n_embd, vocab_size, bias=False)
 
-        # Initialize weights
+        # Initialize weights with smaller standard deviation
         self.apply(self._init_weights)
+
+        # Scale final layer weights
+        with torch.no_grad():
+            self.head.weight.data.normal_(mean=0.0, std=0.01)
 
     def _init_weights(self, module):
         if isinstance(module, (nn.Linear, nn.Embedding)):
-            module.weight.data.normal_(mean=0.0, std=0.02)
+            module.weight.data.normal_(mean=0.0, std=0.01)
             if isinstance(module, nn.Linear) and module.bias is not None:
                 module.bias.data.zero_()
         elif isinstance(module, nn.LayerNorm):
@@ -62,48 +72,70 @@ class CreativeWritingTransformer(nn.Module):
         device = idx.device
         b, t = idx.size()
 
-        # Get token embeddings
+        # Get token embeddings and apply initial normalization
         tok_emb = self.tok_emb(idx)
+        tok_emb = self.ln_0(tok_emb)
 
         # Add positional embeddings
         pos_emb = self.pos_emb[:, :t, :]
         x = self.drop(tok_emb + pos_emb)
 
-        # Apply transformer blocks
+        # Apply transformer blocks with residual connections
         for block in self.blocks:
-            x = block(x)
+            x = x + block(x)
 
+        # Final normalization and projection
         x = self.ln_f(x)
         logits = self.head(x)
 
         # Calculate loss if targets provided
         loss = None
         if targets is not None:
-            loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
+            loss = F.cross_entropy(
+                logits.view(-1, logits.size(-1)),
+                targets.view(-1),
+                ignore_index=self.tokenizer.pad_token_id
+            )
 
         return logits, loss if targets is not None else logits
 
-    def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None):
-        """Generate text tokens"""
+    def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None, top_p=0.9):
         for _ in range(max_new_tokens):
-            # Crop context if it's too long
             idx_cond = idx if idx.size(1) <= 1024 else idx[:, -1024:]
 
-            # Forward pass
-            logits, _ = self(idx_cond)
-            logits = logits[:, -1, :] / temperature
+            attention_mask = (idx_cond != self.tokenizer.pad_token_id).float()
 
-            # Optional top-k sampling
-            if top_k is not None:
-                v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
-                logits[logits < v[:, [-1]]] = float('-inf')
+            with torch.no_grad():
+                logits, _ = self(idx_cond)
+                logits = logits[:, -1, :] / temperature
 
-            # Apply softmax and sample
-            probs = F.softmax(logits, dim=-1)
-            idx_next = torch.multinomial(probs, num_samples=1)
+                logits[:, self.tokenizer.pad_token_id] = float('-inf')
 
-            # Append sampled token
+                if top_k is not None:
+                    indices_to_remove = logits < torch.topk(logits, top_k)[0][..., -1, None]
+                    logits[indices_to_remove] = float('-inf')
+
+                if top_p < 1.0:
+                    sorted_logits, sorted_indices = torch.sort(logits, descending=True)
+                    cumulative_probs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
+
+                    sorted_indices_to_remove = cumulative_probs > top_p
+                    sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
+                    sorted_indices_to_remove[..., 0] = 0
+
+                    indices_to_remove = sorted_indices_to_remove.scatter(1, sorted_indices, sorted_indices_to_remove)
+                    logits[indices_to_remove] = float('-inf')
+
+                probs = F.softmax(logits, dim=-1)
+                idx_next = torch.multinomial(probs, num_samples=1)
+
+                if idx_next.item() == self.tokenizer.pad_token_id:
+                    break
+
             idx = torch.cat((idx, idx_next), dim=1)
+
+            if idx_next.item() == self.tokenizer.eos_token_id:
+                break
 
         return idx
 
